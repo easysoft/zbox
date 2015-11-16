@@ -1,0 +1,8 @@
+ZBOX是Apache、Mysql、PHP的精简的集成环境。使用时，需要将其解压到/opt目录。
+
+/opt/zbox/zbox -h     可以获取帮助
+/opt/zbox/zbox start  启动脚本
+
+Mysql 用户名root，密码为空。
+
+更多可以访问http://www.zentao.net/goto.php?item=zbox.
