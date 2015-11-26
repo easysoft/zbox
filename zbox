@@ -39,6 +39,7 @@ if(isset($params['-ap'])) changePort($basePath . '/etc/apache/httpd.conf', $para
 if(isset($params['-mp']))
 {
     changePort($basePath . '/etc/mysql/my.cnf', $params['-mp'], '^port *= *([0-9]+)');
+    changePort($basePath . '/app/htdocs/index.php', $params['-mp'], 'localhost\:([0-9]+)\&');
 
     $myReg = '^\$config->db->port *= *.([0-9]+)..*;';
     if(file_exists("$basePath/app/zentao/config/my.php"))

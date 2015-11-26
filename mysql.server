@@ -145,7 +145,7 @@ case "$mode" in
       kill $mysqld_pid
       sleep 1
     else
-      log_failure_msg "MySQL server process #$mysqld_pid is not running!"
+      log_failure_msg "MySQL server is not running!"
     fi
 
     exit

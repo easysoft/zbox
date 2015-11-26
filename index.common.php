@@ -12,7 +12,7 @@ $config->langs['en'] = 'English';
 
 $lang->cn->title = '欢迎使用禅道ZAMP集成运行环境！';
 
-$lang->cn->links['adminer']['link']   = '/adminer/';
+$lang->cn->links['adminer']['link']   = '/adminer/index.php?server=localhost:3306&username=root';
 $lang->cn->links['adminer']['text']   = '数据库管理';
 $lang->cn->links['adminer']['target'] = '_blank';
 
@@ -22,7 +22,7 @@ $lang->cn->links['official']['target']   = '_blank';
 
 $lang->en->title = 'Welcome to use zentao zamp!';
 
-$lang->en->links['adminer']['link']   = '/adminer/';
+$lang->en->links['adminer']['link']   = '/adminer/index.php?server=localhost:3306&username=root';
 $lang->en->links['adminer']['text']   = 'MySQL';
 $lang->en->links['adminer']['target'] = '_blank';
 

@@ -21,7 +21,7 @@ $lang->cn->links['official']['link']     = 'http://www.chanzhi.org/';
 $lang->cn->links['official']['text']     = '蝉知官网';
 $lang->cn->links['official']['target']   = '_blank';
 
-$lang->cn->links['adminer']['link']   = '/adminer/';
+$lang->cn->links['adminer']['link']   = '/adminer/index.php?server=localhost:3306&username=root';
 $lang->cn->links['adminer']['text']   = '数据库管理';
 $lang->cn->links['adminer']['target'] = '_blank';
 
@@ -39,7 +39,7 @@ $lang->en->links['official']['link']     = 'http://www.chanzhi.org/';
 $lang->en->links['official']['text']     = 'Community';
 $lang->en->links['official']['target']   = '_blank';
 
-$lang->en->links['adminer']['link']   = '/adminer/';
+$lang->en->links['adminer']['link']   = '/adminer/index.php?server=localhost:3306&username=root';
 $lang->en->links['adminer']['text']   = 'MySQL';
 $lang->en->links['adminer']['target'] = '_blank';
 

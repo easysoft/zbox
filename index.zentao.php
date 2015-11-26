@@ -20,7 +20,7 @@ $lang->cn->links['zentaopro']['target']  = '_self';
 
 $lang->cn->title    = '欢迎使用禅道集成运行环境！';
 $lang->cn->official = " <a href='http://www.zentao.net' target='_blank'>禅道官网</a>";
-$lang->cn->adminer  = "<a href='/adminer/' target='_blank'>数据库管理</a>";
+$lang->cn->adminer  = "<a href='/adminer/index.php?server=localhost:3306&username=root' target='_blank'>数据库管理</a>";
 
 $lang->en->links['zentao']['link']       = '/zentao/';
 $lang->en->links['zentao']['text']       = 'Zentao';
@@ -32,7 +32,7 @@ $lang->en->links['zentaopro']['target']  = '_self';
 
 $lang->en->title    = 'Welcome to use zentao!';
 $lang->en->official = " <a href='http://www.zentao.net/en' target='_blank'>Community</a>";
-$lang->en->adminer  = "<a href='/adminer/' target='_blank'>MySQL</a>";
+$lang->en->adminer  = "<a href='/adminer/index.php?server=localhost:3306&username=root' target='_blank'>MySQL</a>";
 
 $acceptLang = stripos($_SERVER['HTTP_ACCEPT_LANGUAGE'], 'zh-CN') !== false ? 'cn' : 'en';
 $acceptLang = isset($_GET['lang']) ? $_GET['lang'] : $acceptLang;
