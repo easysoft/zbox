@@ -43,19 +43,20 @@ if(!file_exists('/root/bin/patchelf'))
 if(!file_exists("$basePath/apachefinish"))
 {
     /* Download apache. */
-    if(!file_exists('httpd-2.4.16.tar.gz'))   zexec('wget http://apache.fayea.com//httpd/httpd-2.4.16.tar.gz');
+    $apacheVersion = '2.4.17';
+    if(!file_exists("httpd-{$apacheVersion}.tar.gz"))   zexec("wget http://apache.fayea.com//httpd/httpd-{$apacheVersion}.tar.gz");
     if(!file_exists('apr-1.5.2.tar.gz'))      zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-1.5.2.tar.gz');
     if(!file_exists('apr-util-1.5.4.tar.gz')) zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-util-1.5.4.tar.gz');
-    zexec('rm -rf httpd-2.4.16; tar zxvf httpd-2.4.16.tar.gz');
+    zexec("rm -rf httpd-{$apacheVersion}; tar zxvf httpd-{$apacheVersion}.tar.gz");
 
-    zexec("cp apr-1.5.2.tar.gz apr-util-1.5.4.tar.gz $buildPath/httpd-2.4.16/srclib");
-    chdir($buildPath . '/httpd-2.4.16/srclib/');
+    zexec("cp apr-1.5.2.tar.gz apr-util-1.5.4.tar.gz $buildPath/httpd-{$apacheVersion}/srclib");
+    chdir($buildPath . "/httpd-{$apacheVersion}/srclib/");
     zexec('tar zxvf apr-1.5.2.tar.gz');
     zexec('tar zxvf apr-util-1.5.4.tar.gz');
     zexec('mv apr-1.5.2 apr; mv apr-util-1.5.4 apr-util; rm apr-1.5.2.tar.gz apr-util-1.5.4.tar.gz');
 
     /* Compile apache. */
-    chdir($buildPath . '/httpd-2.4.16/');
+    chdir($buildPath . "/httpd-{$apacheVersion}/");
     zexec('./configure --prefix=/opt/zbox/run/apache --bindir=/opt/zbox/run/apache \
         --sbindir=/opt/zbox/run/apache \
         --sysconfdir=/opt/zbox/etc/apache \
@@ -69,11 +70,12 @@ chdir($buildPath);
 if(!file_exists("$basePath/mysqlfinish"))
 {
     /* Download mysql. */
-    if(!file_exists('mysql-5.5.45.tar.gz')) zexec('wget http://dev.mysql.com/get/Downloads/MySQL-5.5/mysql-5.5.45.tar.gz');
-    zexec('rm -rf mysql-5.5.45; tar zxvf mysql-5.5.45.tar.gz');
+    $mysqlVersion = '5.5.45';
+    if(!file_exists("mysql-{$mysqlVersion}.tar.gz")) zexec("wget http://dev.mysql.com/get/Downloads/MySQL-5.5/mysql-{$mysqlVersion}.tar.gz");
+    zexec("rm -rf mysql-{$mysqlVersion}; tar zxvf mysql-{$mysqlVersion}.tar.gz");
 
     /* Compile php. */
-    chdir($buildPath . '/mysql-5.5.45');
+    chdir($buildPath . "/mysql-{$mysqlVersion}");
     zexec('cmake . -DCMAKE_INSTALL_PREFIX=/opt/zbox/run/mysql \
         -DSYSCONFDIR=/opt/zbox/etc/mysql \
         -DINSTALL_LIBDIR=/opt/zbox/run/lib/ \
@@ -89,14 +91,15 @@ if(!file_exists("$basePath/phpfinish"))
 {
     /* Download php. */
     `apt-get install mysql-server`;
-    if(!file_exists('php-5.6.13.tar.bz2')) zexec('wget http://cn2.php.net/distributions/php-5.6.13.tar.bz2');
+    $phpVersion = '5.6.13';
+    if(!file_exists("php-{$phpVersion}.tar.bz2")) zexec("wget http://cn2.php.net/distributions/php-{$phpVersion}.tar.bz2");
     //if(!file_exists('php-7.0.0RC3.tar.gz')) zexec('wget https://downloads.php.net/~ab/php-7.0.0RC3.tar.gz');
-    zexec('rm -rf php-5.6.13; tar jxvf php-5.6.13.tar.bz2');
+    zexec("rm -rf php-{$phpVersion}; tar jxvf php-{$phpVersion}.tar.bz2");
     //zexec('rm -rf php-7.0.0RC3; tar zxvf php-7.0.0RC3.tar.gz');
 
 
     /* Compile php. */
-    chdir($buildPath . '/php-5.6.13');
+    chdir($buildPath . "/php-{$phpVersion}");
     //chdir($buildPath . '/php-7.0.0RC3');
     zexec('./configure --prefix=/opt/zbox/run/ \
         --bindir=/opt/zbox/run/php \
