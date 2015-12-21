@@ -87,7 +87,7 @@ if(isset($params['-k']))
         else
         {
             echo `$basePath/run/apache/apachectl start`;
-            sleep(1);
+            sleep(2);
             $httpd = `ps aux|grep '\/opt\/zbox\/run\/apache\/httpd '`;
             echo empty($httpd) ? "Start Apache fail. You can see the log /opt/zbox/logs/apache_error.log\n" : "Start Apache success\n";
         }
@@ -100,7 +100,7 @@ if(isset($params['-k']))
         else
         {
             echo `$basePath/run/mysql/mysql.server start --defaults-file=$basePath/etc/mysql/my.cnf`;
-            sleep(1);
+            sleep(2);
             $mysql = `ps aux|grep '\/opt\/zbox\/run\/mysql\/mysqld '`;
             echo empty($mysql) ? "Start Mysql fail. You can see the log /opt/zbox/logs/mysql_error.log\n"   : "Start Mysql success\n";
         }
@@ -110,7 +110,7 @@ if(isset($params['-k']))
         if($httpd)
         {
             echo `$basePath/run/apache/apachectl stop`;
-            sleep(1);
+            sleep(2);
             $httpd = `ps aux|grep '\/opt\/zbox\/run\/apache\/httpd '`;
             echo empty($httpd) ? "Stop Apache success\n" : "Stop Apache fail. You can see the log /opt/zbox/logs/apache_error.log\n";
         }
@@ -123,7 +123,7 @@ if(isset($params['-k']))
         if($mysql)
         {
             echo `$basePath/run/mysql/mysql.server stop`;
-            sleep(1);
+            sleep(2);
             $mysql = `ps aux|grep '\/opt\/zbox\/run\/mysql\/mysqld '`;
             echo empty($mysql) ? "Stop Mysql success\n"  : "Stop Mysql fail. You can see the log /opt/zbox/logs/mysql_error.log\n";
         }
@@ -134,12 +134,12 @@ if(isset($params['-k']))
         break;
     case 'restart':
         echo `$basePath/run/apache/apachectl restart`;
-        sleep(1);
+        sleep(2);
         $httpd = `ps aux|grep '\/opt\/zbox\/run\/apache\/httpd '`;
         echo empty($httpd) ? "Restart Apache fail. You can see the log /opt/zbox/logs/apache_error.log\n" : "Retart Apache success\n";
 
         echo `$basePath/run/mysql/mysql.server restart --defaults-file=$basePath/etc/mysql/my.cnf`;
-        sleep(1);
+        sleep(2);
         $mysql = `ps aux|grep '\/opt\/zbox\/run\/mysql\/mysqld '`;
         echo empty($mysql) ? "Restart Mysql fail. You can see the log /opt/zbox/logs/mysql_error.log\n"   : "Retart Mysql success\n";
         break;

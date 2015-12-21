@@ -93,14 +93,11 @@ if(!file_exists("$basePath/phpfinish"))
     `apt-get install mysql-server`;
     $phpVersion = '5.6.13';
     if(!file_exists("php-{$phpVersion}.tar.bz2")) zexec("wget http://cn2.php.net/distributions/php-{$phpVersion}.tar.bz2");
-    //if(!file_exists('php-7.0.0RC3.tar.gz')) zexec('wget https://downloads.php.net/~ab/php-7.0.0RC3.tar.gz');
     zexec("rm -rf php-{$phpVersion}; tar jxvf php-{$phpVersion}.tar.bz2");
-    //zexec('rm -rf php-7.0.0RC3; tar zxvf php-7.0.0RC3.tar.gz');
 
 
     /* Compile php. */
     chdir($buildPath . "/php-{$phpVersion}");
-    //chdir($buildPath . '/php-7.0.0RC3');
     zexec('./configure --prefix=/opt/zbox/run/ \
         --bindir=/opt/zbox/run/php \
         --libdir=/opt/zbox/run/lib \
