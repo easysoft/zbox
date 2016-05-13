@@ -106,7 +106,7 @@ if(!file_exists("$basePath/phpfinish"))
         --with-config-file-path=/opt/zbox/etc/php \
         --enable-mbstring --enable-bcmath --enable-sockets --disable-ipv6 \
         --with-curl --with-openssl \
-        --with-gd --enable-gd-native-ttf --enable-gd-jis-conv \
+        --with-gd --with-jpeg-dir --enable-gd-native-ttf --enable-gd-jis-conv \
         --with-ldap --with-ldap-sasl \
         --enable-zip --with-zlib --with-bz2 \
         --with-mysqli --with-pdo-mysql');
