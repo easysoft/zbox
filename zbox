@@ -74,6 +74,7 @@ if(isset($params['-k']))
     if(strpos(file_get_contents('/etc/group'), 'nogroup') === false) echo `groupadd nogroup`;
     if(strpos(file_get_contents('/etc/passwd'), 'nobody') === false) echo `useradd nobody`;
     `chmod -R 777 $basePath/tmp`;
+    `chmod -R 644 $basePath/etc/mysql/my.cnf`;
     `chown -R nobody $basePath/data/mysql`;
 
     switch($params['-k'])
