@@ -156,6 +156,7 @@ zexec("sed -i 's/\/opt\/zbox\/run\/mysql\/\/opt\/zbox\/run/\/opt\/zbox\/run/g' $
 /* Simplify php */
 chdir($opath);
 zexec("cp php.ini $basePath/etc/php/php.ini");
+zexec("cp curl-ca-bundle.crt $basePath/etc/php/curl-ca-bundle.crt");
 zexec("mkdir -p $basePath/run/newphp/lib");
 chdir("$basePath/run/php");
 zexec("cp php $basePath/run/newphp");
