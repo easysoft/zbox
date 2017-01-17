@@ -44,12 +44,12 @@ if(!file_exists("$basePath/apachefinish"))
 {
     /* Download apache. */
     $apacheVersion = '2.4.17';
-    if(!file_exists("httpd-{$apacheVersion}.tar.gz"))   zexec("wget http://apache.fayea.com//httpd/httpd-{$apacheVersion}.tar.gz");
+    if(!file_exists("httpd-{$apacheVersion}.tar.gz"))   zexec("wget http://archive.apache.org/dist/httpd/httpd-{$apacheVersion}.tar.gz");
     if(!file_exists('apr-1.5.2.tar.gz'))      zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-1.5.2.tar.gz');
     if(!file_exists('apr-util-1.5.4.tar.gz')) zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-util-1.5.4.tar.gz');
     zexec("rm -rf httpd-{$apacheVersion}; tar zxvf httpd-{$apacheVersion}.tar.gz");
 
-    zexec("cp apr-1.5.2.tar.gz apr-util-1.5.4.tar.gz $buildPath/httpd-{$apacheVersion}/srclib");
+    zexec("cp apr-1.5.2.tar.gz apr-util-1.5.4.tar.gz $buildPath/httpd-$apacheVersion/srclib");
     chdir($buildPath . "/httpd-{$apacheVersion}/srclib/");
     zexec('tar zxvf apr-1.5.2.tar.gz');
     zexec('tar zxvf apr-util-1.5.4.tar.gz');
@@ -105,8 +105,8 @@ if(!file_exists("$basePath/phpfinish"))
         --with-apxs2=/opt/zbox/run/apache/apxs \
         --with-config-file-path=/opt/zbox/etc/php \
         --enable-mbstring --enable-bcmath --enable-sockets --disable-ipv6 \
-        --with-curl --with-openssl \
-        --with-gd --with-jpeg-dir --enable-gd-native-ttf --enable-gd-jis-conv \
+        --with-curl --with-openssl --with-imap --with-kerberos --with-imap-ssl \
+        --with-gd  --with-jpeg-dir --enable-gd-native-ttf --enable-gd-jis-conv \
         --with-ldap --with-ldap-sasl \
         --enable-zip --with-zlib --with-bz2 \
         --with-mysqli --with-pdo-mysql');
@@ -142,7 +142,7 @@ zexec("cp my.cnf $basePath/etc/mysql/my.cnf");
 chdir("$basePath/run/mysql");
 zexec("scripts/mysql_install_db --basedir=$basePath/run/mysql --datadir=$basePath/data/mysql --defaults-file=$basePath/etc/mysql/my.cnf --user=nobody");
 chdir("$basePath/run/mysql/bin");
-zexec("cp my_print_defaults mysql mysqld mysqld_safe mysqldump $basePath/run/newmysql");
+zexec("cp my_print_defaults mysql mysqld mysqld_safe mysqldump myisamchk $basePath/run/newmysql");
 zexec("cp $opath/mysql.server $basePath/run/newmysql;chmod a+x $basePath/run/newmysql/mysql.server");
 zexec("mkdir -p $basePath/run/newmysql/share/english");
 zexec("cp $basePath/run/mysql/share/english/errmsg.sys $basePath/run/newmysql/share/english");
@@ -206,7 +206,8 @@ foreach($runDirs as $runDir)
             $allLib[$so] = $so;
         }
 
-        zexec("strip --strip-debug $file");
+        echo("strip --strip-debug $file\n");
+        system("strip --strip-debug $file");
         if($interpreter)
         {
             $interpreter = trim(substr($interpreter, 0, strpos($interpreter, '(')));
