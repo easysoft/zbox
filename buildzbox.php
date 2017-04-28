@@ -24,6 +24,7 @@ if(!is_dir($basePath))
     zexec("mkdir app auth bin data etc logs run tmp");
     zexec("mkdir app/htdocs data/mysql tmp/php tmp/apache tmp/mysql etc/php etc/mysql");
     zexec("chmod -R 777 tmp");
+    zexec("chmod -R 777 logs");
     zexec("cp -r $opath/adminer $basePath/app");
     zexec("cp -r $opath/adduser.sh $basePath/auth");
     zexec("touch $basePath/auth/users");
@@ -43,7 +44,7 @@ if(!file_exists('/root/bin/patchelf'))
 if(!file_exists("$basePath/apachefinish"))
 {
     /* Download apache. */
-    $apacheVersion = '2.4.17';
+    $apacheVersion = '2.4.25';
     if(!file_exists("httpd-{$apacheVersion}.tar.gz"))   zexec("wget http://archive.apache.org/dist/httpd/httpd-{$apacheVersion}.tar.gz");
     if(!file_exists('apr-1.5.2.tar.gz'))      zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-1.5.2.tar.gz');
     if(!file_exists('apr-util-1.5.4.tar.gz')) zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-util-1.5.4.tar.gz');
@@ -70,18 +71,44 @@ chdir($buildPath);
 if(!file_exists("$basePath/mysqlfinish"))
 {
     /* Download mysql. */
-    $mysqlVersion = '5.5.45';
-    if(!file_exists("mysql-{$mysqlVersion}.tar.gz")) zexec("wget http://dev.mysql.com/get/Downloads/MySQL-5.5/mysql-{$mysqlVersion}.tar.gz");
-    zexec("rm -rf mysql-{$mysqlVersion}; tar zxvf mysql-{$mysqlVersion}.tar.gz");
+    //$mysqlVersion = '5.7.18';
+    //if(!file_exists("mysql-{$mysqlVersion}.tar.gz")) zexec("wget http://cdn.mysql.com/Downloads/MySQL-5.7/mysql-{$mysqlVersion}.tar.gz");
+    //if(!file_exists("boost_1_59_0.tar.gz")) zexec("wget http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.gz");
+
+    //zexec("rm -rf boost_1_59_0; tar zxvf boost_1_59_0.tar.gz");
+    //$boostPath = $buildPath . '/boost_1_59_0';
+    //chdir($buildPath . "/mysql-{$mysqlVersion}");
+    //zexec("cmake . -DCMAKE_INSTALL_PREFIX=/opt/zbox/run/mysql \
+    //    -DINSTALL_BINDIR=/opt/zbox/run/mysql/
+    //    -DSYSCONFDIR=/opt/zbox/etc/mysql \
+    //    -DINSTALL_LIBDIR=/opt/zbox/run/lib/ \
+    //    -DINSTALL_PLUGINDIR=/opt/zbox/run/lib/mysql/plugin \
+    //    -DEXTRA_CHARSETS=all \
+    //    -DWITH_BOOST={$boostPath} \
+    //    -DDEFAULT_CHARSET=utf8 -DDEFAULT_COLLATION=utf8_general_ci");
+
+    $mysqlVersion = '10.1.22';
+    if(!file_exists("mariadb-{$mysqlVersion}.tar.gz")) zexec("wget http://mirrors.neusoft.edu.cn/mariadb//mariadb-10.1.22/source/mariadb-{$mysqlVersion}.tar.gz");
+    zexec("rm -rf mariadb-{$mysqlVersion}; tar zxvf mariadb-{$mysqlVersion}.tar.gz");
 
     /* Compile php. */
-    chdir($buildPath . "/mysql-{$mysqlVersion}");
-    zexec('cmake . -DCMAKE_INSTALL_PREFIX=/opt/zbox/run/mysql \
+    chdir($buildPath . "/mariadb-{$mysqlVersion}");
+    zexec("cmake . -DCMAKE_INSTALL_PREFIX=/opt/zbox/run/mysql \
         -DSYSCONFDIR=/opt/zbox/etc/mysql \
+        -DMYSQL_DATADIR=/opt/zbox/data/mysql \
         -DINSTALL_LIBDIR=/opt/zbox/run/lib/ \
         -DINSTALL_PLUGINDIR=/opt/zbox/run/lib/mysql/plugin \
+        -DWITHOUT_TOKUDB=1  \
+        -DWITH_INNOBASE_STORAGE_ENGINE=1  \
+        -DWITH_ARCHIVE_STPRAGE_ENGINE=1  \
+        -DWITH_BLACKHOLE_STORAGE_ENGINE=1  \
         -DEXTRA_CHARSETS=all \
-        -DDEFAULT_CHARSET=utf8 -DDEFAULT_COLLATION=utf8_general_ci');
+        -DWIYH_READLINE=1  \
+        -DWIYH_SSL=system  \
+        -DVITH_ZLIB=system  \
+        -DWITH_LOBWRAP=0  \
+        -DMYSQL_UNIX_ADDR=/opt/zbox/tmp/mysql/mysql.sock \
+        -DDEFAULT_CHARSET=utf8 -DDEFAULT_COLLATION=utf8_general_ci");
     zexec('make && make install');
     zexec("touch $basePath/mysqlfinish");
 }
@@ -91,7 +118,7 @@ if(!file_exists("$basePath/phpfinish"))
 {
     /* Download php. */
     `apt-get install mysql-server`;
-    $phpVersion = '5.6.13';
+    $phpVersion = '7.0.15';
     if(!file_exists("php-{$phpVersion}.tar.bz2")) zexec("wget http://cn2.php.net/distributions/php-{$phpVersion}.tar.bz2");
     zexec("rm -rf php-{$phpVersion}; tar jxvf php-{$phpVersion}.tar.bz2");
 
@@ -109,6 +136,7 @@ if(!file_exists("$basePath/phpfinish"))
         --with-gd  --with-jpeg-dir --enable-gd-native-ttf --enable-gd-jis-conv \
         --with-ldap --with-ldap-sasl \
         --enable-zip --with-zlib --with-bz2 \
+        --enable-opcache --with-mcrypt \
         --with-mysqli --with-pdo-mysql');
     zexec('make && make install');
     zexec("touch $basePath/phpfinish");
@@ -121,7 +149,7 @@ zexec("cp ab htpasswd httpd $basePath/run/newapache/");
 zexec("cp $opath/apachectl $basePath/run/newapache;chmod a+x $basePath/run/newapache/apachectl");
 zexec("mkdir $basePath/run/newapache/modules");
 chdir("$basePath/run/apache/modules");
-zexec("cp libphp5.so mod_authn_file.so mod_access_compat.so mod_alias.so mod_authn_core.so mod_auth_basic.so mod_authz_core.so mod_authz_host.so mod_authz_user.so mod_autoindex.so mod_deflate.so mod_dir.so mod_env.so mod_expires.so mod_filter.so mod_log_config.so mod_mime.so mod_rewrite.so mod_setenvif.so mod_unixd.so mod_ssl.so mod_macro.so mod_headers.so $basePath/run/newapache/modules");
+zexec("cp libphp7.so mod_authn_file.so mod_access_compat.so mod_alias.so mod_authn_core.so mod_auth_basic.so mod_authz_core.so mod_authz_host.so mod_authz_user.so mod_autoindex.so mod_deflate.so mod_dir.so mod_env.so mod_expires.so mod_filter.so mod_log_config.so mod_mime.so mod_rewrite.so mod_setenvif.so mod_unixd.so mod_ssl.so mod_macro.so mod_headers.so $basePath/run/newapache/modules");
 chdir($basePath);
 zexec("rm -rf $basePath/run/apache");
 zexec("rm -rf $basePath/run/lib/pkgconfig");
@@ -140,7 +168,7 @@ zexec("mkdir $basePath/run/newmysql");
 chdir($opath);
 zexec("cp my.cnf $basePath/etc/mysql/my.cnf");
 chdir("$basePath/run/mysql");
-zexec("scripts/mysql_install_db --basedir=$basePath/run/mysql --datadir=$basePath/data/mysql --defaults-file=$basePath/etc/mysql/my.cnf --user=nobody");
+zexec("scripts/mysql_install_db --defaults-file=$basePath/etc/mysql/my.cnf --basedir=$basePath/run/mysql --datadir=$basePath/data/mysql --user=nobody --force");
 chdir("$basePath/run/mysql/bin");
 zexec("cp my_print_defaults mysql mysqld mysqld_safe mysqldump myisamchk $basePath/run/newmysql");
 zexec("cp $opath/mysql.server $basePath/run/newmysql;chmod a+x $basePath/run/newmysql/mysql.server");
@@ -161,10 +189,9 @@ zexec("mkdir -p $basePath/run/newphp/lib");
 chdir("$basePath/run/php");
 zexec("cp php $basePath/run/newphp");
 zexec("cp $opath/php_ioncube.so $basePath/run/newphp/lib/php_ioncube.so");
+zexec("cp $basePath/run/lib/extensions/no-debug-zts-20151012/opcache.so $basePath/run/newphp/lib/php_opcache.so");
 $uname = `uname -m`;
 if(strpos($uname, '_64') !== false) zexec("cp $opath/php_ioncube_x64.so $basePath/run/newphp/lib/php_ioncube.so");
-exec("find $basePath/run/lib/extensions/ -name *opcache.so", $output);
-foreach($output as $opcachePath) zexec("cp $opcachePath $basePath/run/newphp/lib/php_opcache.so");
 chdir("$basePath/run");
 zexec("rm -rf $basePath/run/php $basePath/run/include $basePath/run/var $basePath/run/lib/build $basePath/run/lib/extensions $basePath/run/lib/php");
 zexec("mv $basePath/run/newphp $basePath/run/php");
@@ -255,3 +282,10 @@ zexec("ln -s $basePath/run/mysql/mysql $basePath/bin/");
 zexec("ln -s $basePath/run/php/php $basePath/bin/");
 
 zexec("rm $basePath/apachefinish $basePath/mysqlfinish $basePath/phpfinish");
+
+/* Set mysql root password and add new mysql user. */
+`service mysql stop`;
+zexec("$basePath/run/mysql/mysql.server start --defaults-file=$basePath/etc/mysql/my.cnf");
+sleep(2);
+zexec("$basePath/run/mysql/mysql --defaults-file=$basePath/etc/mysql/my.cnf -uroot < $opath/createuser.sql");
+zexec("$basePath/run/mysql/mysql.server stop");
