@@ -20,6 +20,7 @@ if(!is_dir($basePath))
 {
     zexec("mkdir $basePath");
     zexec("cp zbox $basePath/");
+    zexec("cp zbox.php $basePath/");
     chdir($basePath);
     zexec("mkdir app auth bin data etc logs run tmp");
     zexec("mkdir app/htdocs data/mysql tmp/php tmp/apache tmp/mysql etc/php etc/mysql");
@@ -170,7 +171,7 @@ zexec("cp my.cnf $basePath/etc/mysql/my.cnf");
 chdir("$basePath/run/mysql");
 zexec("scripts/mysql_install_db --defaults-file=$basePath/etc/mysql/my.cnf --basedir=$basePath/run/mysql --datadir=$basePath/data/mysql --user=nobody --force");
 chdir("$basePath/run/mysql/bin");
-zexec("cp my_print_defaults mysql mysqld mysqld_safe mysqldump myisamchk $basePath/run/newmysql");
+zexec("cp my_print_defaults aria_chk mysql mysqld mysqld_safe mysqldump myisamchk $basePath/run/newmysql");
 zexec("cp $opath/mysql.server $basePath/run/newmysql;chmod a+x $basePath/run/newmysql/mysql.server");
 zexec("mkdir -p $basePath/run/newmysql/share/english");
 zexec("cp $basePath/run/mysql/share/english/errmsg.sys $basePath/run/newmysql/share/english");
