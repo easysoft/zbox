@@ -161,7 +161,9 @@ if(isset($params['-k']))
         $httpd = `ps aux|grep '\/opt\/zbox\/run\/apache\/httpd '`;
         echo empty($httpd) ? "Restart Apache fail. You can see the log /opt/zbox/logs/apache_error.log\n" : "Retart Apache success\n";
 
-        echo `$basePath/run/mysql/mysql.server restart --defaults-file=$basePath/etc/mysql/my.cnf`;
+        echo `$basePath/run/mysql/mysql.server stop`;
+        sleep(2);
+        echo `$basePath/run/mysql/mysql.server start --defaults-file=$basePath/etc/mysql/my.cnf`;
         sleep(2);
         $mysql = `ps aux|grep '\/opt\/zbox\/run\/mysql\/mysqld '`;
         echo empty($mysql) ? "Restart Mysql fail. You can see the log /opt/zbox/logs/mysql_error.log\n"   : "Retart Mysql success\n";
