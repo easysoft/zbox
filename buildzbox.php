@@ -34,9 +34,9 @@ if(!is_dir($basePath))
 chdir($buildPath);
 if(!file_exists('/root/bin/patchelf'))
 {
-    if(!file_exists('patchelf-0.8.tar.gz')) zexec('wget http://nixos.org/releases/patchelf/patchelf-0.8/patchelf-0.8.tar.gz');
-    zexec('rm -rf patchelf-0.8; tar zxvf patchelf-0.8.tar.gz');
-    chdir($buildPath . '/patchelf-0.8/');
+    if(!file_exists('patchelf-0.9.tar.gz')) zexec('wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.gz');
+    zexec('rm -rf patchelf-0.9; tar zxvf patchelf-0.9.tar.gz');
+    chdir($buildPath . '/patchelf-0.9/');
     zexec("./configure --prefix=$buildPath/patchelf");
     zexec('make && make install');
     zexec("mkdir /root/bin; cp $buildPath/patchelf/bin/patchelf /root/bin");
@@ -47,15 +47,16 @@ if(!file_exists("$basePath/apachefinish"))
     /* Download apache. */
     $apacheVersion = '2.4.25';
     if(!file_exists("httpd-{$apacheVersion}.tar.gz"))   zexec("wget http://archive.apache.org/dist/httpd/httpd-{$apacheVersion}.tar.gz");
-    if(!file_exists('apr-1.5.2.tar.gz'))      zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-1.5.2.tar.gz');
-    if(!file_exists('apr-util-1.5.4.tar.gz')) zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-util-1.5.4.tar.gz');
+    if(!file_exists('apr-1.6.5.tar.gz'))      zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-1.6.5.tar.gz');
+    if(!file_exists('apr-util-1.6.1.tar.gz')) zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-util-1.6.1.tar.gz');
     zexec("rm -rf httpd-{$apacheVersion}; tar zxvf httpd-{$apacheVersion}.tar.gz");
 
-    zexec("cp apr-1.5.2.tar.gz apr-util-1.5.4.tar.gz $buildPath/httpd-$apacheVersion/srclib");
+    zexec("mkdir -p $buildPath/httpd-$apacheVersion/srclib");
+    zexec("cp apr-1.6.5.tar.gz apr-util-1.6.1.tar.gz $buildPath/httpd-$apacheVersion/srclib");
     chdir($buildPath . "/httpd-{$apacheVersion}/srclib/");
-    zexec('tar zxvf apr-1.5.2.tar.gz');
-    zexec('tar zxvf apr-util-1.5.4.tar.gz');
-    zexec('mv apr-1.5.2 apr; mv apr-util-1.5.4 apr-util; rm apr-1.5.2.tar.gz apr-util-1.5.4.tar.gz');
+    zexec('tar zxvf apr-1.6.5.tar.gz');
+    zexec('tar zxvf apr-util-1.6.1.tar.gz');
+    zexec('mv apr-1.6.5 apr; mv apr-util-1.6.1 apr-util; rm apr-1.6.5.tar.gz apr-util-1.6.1.tar.gz');
 
     /* Compile apache. */
     chdir($buildPath . "/httpd-{$apacheVersion}/");
@@ -63,7 +64,7 @@ if(!file_exists("$basePath/apachefinish"))
         --sbindir=/opt/zbox/run/apache \
         --sysconfdir=/opt/zbox/etc/apache \
         --libdir=/opt/zbox/run/lib \
-        --enable-mods-shared=all --enable-so --with-included-apr');
+        --enable-mods-shared=all --enable-ssl --enable-so --with-included-apr');
     zexec('make && make install');
     zexec("touch $basePath/apachefinish");
 }
@@ -89,7 +90,7 @@ if(!file_exists("$basePath/mysqlfinish"))
     //    -DDEFAULT_CHARSET=utf8 -DDEFAULT_COLLATION=utf8_general_ci");
 
     $mysqlVersion = '10.1.22';
-    if(!file_exists("mariadb-{$mysqlVersion}.tar.gz")) zexec("wget http://mirrors.neusoft.edu.cn/mariadb//mariadb-10.1.22/source/mariadb-{$mysqlVersion}.tar.gz");
+    if(!file_exists("mariadb-{$mysqlVersion}.tar.gz")) zexec("wget https://downloads.mariadb.org/interstitial/mariadb-{$mysqlVersion}/source/mariadb-{$mysqlVersion}.tar.gz/from/http%3A//ftp.hosteurope.de/mirror/archive.mariadb.org/ -O mariadb-{$mysqlVersion}.tar.gz");
     zexec("rm -rf mariadb-{$mysqlVersion}; tar zxvf mariadb-{$mysqlVersion}.tar.gz");
 
     /* Compile php. */
@@ -118,7 +119,7 @@ chdir($buildPath);
 if(!file_exists("$basePath/phpfinish"))
 {
     /* Download php. */
-    `apt-get install mysql-server`;
+    //`apt-get install mysql-server`;
     $phpVersion = '7.0.15';
     if(!file_exists("php-{$phpVersion}.tar.bz2")) zexec("wget http://cn2.php.net/distributions/php-{$phpVersion}.tar.bz2");
     zexec("rm -rf php-{$phpVersion}; tar jxvf php-{$phpVersion}.tar.bz2");
@@ -146,7 +147,7 @@ if(!file_exists("$basePath/phpfinish"))
 /* Simplify apache */
 zexec("mkdir $basePath/run/newapache");
 chdir("$basePath/run/apache");
-zexec("cp ab htpasswd httpd $basePath/run/newapache/");
+zexec("cp ab htpasswd httpd rotatelogs $basePath/run/newapache/");
 zexec("cp $opath/apachectl $basePath/run/newapache;chmod a+x $basePath/run/newapache/apachectl");
 zexec("mkdir $basePath/run/newapache/modules");
 chdir("$basePath/run/apache/modules");
@@ -201,6 +202,7 @@ zexec("cp $opath/README $basePath");
 
 /* Copy lib */
 chdir("$basePath/run");
+zexec("chmod -R a+x $basePath/run/");
 $allLib       = array();
 $runDirs      = array('apache', 'mysql', 'php', 'lib');
 $interpreters = array();
@@ -240,7 +242,7 @@ foreach($runDirs as $runDir)
         {
             $interpreter = trim(substr($interpreter, 0, strpos($interpreter, '(')));
             $interpreterName = basename($interpreter);
-            if($interpreterName)
+            if($interpreterName and file_exists($interpreter))
             {
                 if(!file_exists($basePath . '/run/lib/' . $interpreterName)) zexec("cp $interpreter $basePath/run/lib/$interpreterName");
                 echo system("/root/bin/patchelf --set-interpreter $basePath/run/lib/$interpreterName $file", $result);
