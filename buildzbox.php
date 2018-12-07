@@ -20,15 +20,18 @@ if(!is_dir($basePath))
 {
     zexec("mkdir $basePath");
     zexec("cp zbox $basePath/");
-    zexec("cp zbox.php $basePath/");
     chdir($basePath);
     zexec("mkdir app auth bin data etc logs run tmp");
     zexec("mkdir app/htdocs data/mysql tmp/php tmp/apache tmp/mysql etc/php etc/mysql");
     zexec("chmod -R 777 tmp");
     zexec("chmod -R 777 logs");
+    zexec("cp $opath/zbox.php $basePath/bin/");
     zexec("cp -r $opath/adminer $basePath/app");
     zexec("cp -r $opath/adduser.sh $basePath/auth");
     zexec("touch $basePath/auth/users");
+
+    $xxdPath = strpos(`uname -a`, '86_64') !== false ? "$opath/xxd_64/" : "$opath/xxd_32/";
+    zexec("cp -r $xxdPath $basePath/run/xxd");
 }
 
 chdir($buildPath);
