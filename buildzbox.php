@@ -20,18 +20,15 @@ if(!is_dir($basePath))
 {
     zexec("mkdir $basePath");
     zexec("cp zbox $basePath/");
+    zexec("cp zbox.php $basePath/");
     chdir($basePath);
     zexec("mkdir app auth bin data etc logs run tmp");
     zexec("mkdir app/htdocs data/mysql tmp/php tmp/apache tmp/mysql etc/php etc/mysql");
     zexec("chmod -R 777 tmp");
     zexec("chmod -R 777 logs");
-    zexec("cp $opath/zbox.php $basePath/bin/");
     zexec("cp -r $opath/adminer $basePath/app");
     zexec("cp -r $opath/adduser.sh $basePath/auth");
     zexec("touch $basePath/auth/users");
-
-    $xxdPath = strpos(`uname -a`, '86_64') !== false ? "$opath/xxd_64/" : "$opath/xxd_32/";
-    zexec("cp -r $xxdPath $basePath/run/xxd");
 }
 
 chdir($buildPath);
@@ -48,7 +45,7 @@ if(!file_exists('/root/bin/patchelf'))
 if(!file_exists("$basePath/apachefinish"))
 {
     /* Download apache. */
-    $apacheVersion = '2.4.25';
+    $apacheVersion = '2.4.46';
     if(!file_exists("httpd-{$apacheVersion}.tar.gz"))   zexec("wget http://archive.apache.org/dist/httpd/httpd-{$apacheVersion}.tar.gz");
     if(!file_exists('apr-1.6.5.tar.gz'))      zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-1.6.5.tar.gz');
     if(!file_exists('apr-util-1.6.1.tar.gz')) zexec('wget http://mirrors.hust.edu.cn/apache/apr/apr-util-1.6.1.tar.gz');
@@ -67,7 +64,7 @@ if(!file_exists("$basePath/apachefinish"))
         --sbindir=/opt/zbox/run/apache \
         --sysconfdir=/opt/zbox/etc/apache \
         --libdir=/opt/zbox/run/lib \
-        --enable-mods-shared=all --enable-ssl --enable-so --with-included-apr');
+        --enable-mods-shared=all --enable-so --enable-ssl --with-included-apr');
     zexec('make && make install');
     zexec("touch $basePath/apachefinish");
 }
@@ -92,7 +89,7 @@ if(!file_exists("$basePath/mysqlfinish"))
     //    -DWITH_BOOST={$boostPath} \
     //    -DDEFAULT_CHARSET=utf8 -DDEFAULT_COLLATION=utf8_general_ci");
 
-    $mysqlVersion = '10.1.22';
+    $mysqlVersion = '10.5.5';
     if(!file_exists("mariadb-{$mysqlVersion}.tar.gz")) zexec("wget https://downloads.mariadb.org/interstitial/mariadb-{$mysqlVersion}/source/mariadb-{$mysqlVersion}.tar.gz/from/http%3A//ftp.hosteurope.de/mirror/archive.mariadb.org/ -O mariadb-{$mysqlVersion}.tar.gz");
     zexec("rm -rf mariadb-{$mysqlVersion}; tar zxvf mariadb-{$mysqlVersion}.tar.gz");
 
@@ -123,7 +120,7 @@ if(!file_exists("$basePath/phpfinish"))
 {
     /* Download php. */
     //`apt-get install mysql-server`;
-    $phpVersion = '7.0.15';
+    $phpVersion = '7.2.33';
     if(!file_exists("php-{$phpVersion}.tar.bz2")) zexec("wget http://cn2.php.net/distributions/php-{$phpVersion}.tar.bz2");
     zexec("rm -rf php-{$phpVersion}; tar jxvf php-{$phpVersion}.tar.bz2");
 
@@ -137,15 +134,17 @@ if(!file_exists("$basePath/phpfinish"))
         --with-apxs2=/opt/zbox/run/apache/apxs \
         --with-config-file-path=/opt/zbox/etc/php \
         --enable-mbstring --enable-bcmath --enable-sockets --disable-ipv6 \
-        --with-curl --with-openssl --with-imap --with-kerberos --with-imap-ssl \
+        --with-curl=/usr/local --with-openssl --with-imap --with-kerberos --with-imap-ssl \
         --with-gd  --with-jpeg-dir --enable-gd-native-ttf --enable-gd-jis-conv \
         --with-ldap --with-ldap-sasl \
         --enable-zip --with-zlib --with-bz2 \
         --enable-opcache --with-mcrypt \
         --with-mysqli --with-pdo-mysql');
+    zexec("sed -i '/^EXTRA_LIBS/s/$/ -llber $/g' Makefile");
     zexec('make && make install');
     zexec("touch $basePath/phpfinish");
 }
+//exit;
 
 /* Simplify apache */
 zexec("mkdir $basePath/run/newapache");
@@ -175,7 +174,7 @@ zexec("cp my.cnf $basePath/etc/mysql/my.cnf");
 chdir("$basePath/run/mysql");
 zexec("scripts/mysql_install_db --defaults-file=$basePath/etc/mysql/my.cnf --basedir=$basePath/run/mysql --datadir=$basePath/data/mysql --user=nobody --force");
 chdir("$basePath/run/mysql/bin");
-zexec("cp my_print_defaults aria_chk mysql mysqld mysqld_safe mysqldump myisamchk $basePath/run/newmysql");
+zexec("cp my_print_defaults aria_chk mysql mysqld mysqld_safe mariadb mariadbd mysqldump myisamchk $basePath/run/newmysql");
 zexec("cp $opath/mysql.server $basePath/run/newmysql;chmod a+x $basePath/run/newmysql/mysql.server");
 zexec("mkdir -p $basePath/run/newmysql/share/english");
 zexec("cp $basePath/run/mysql/share/english/errmsg.sys $basePath/run/newmysql/share/english");
@@ -194,7 +193,7 @@ zexec("mkdir -p $basePath/run/newphp/lib");
 chdir("$basePath/run/php");
 zexec("cp php $basePath/run/newphp");
 zexec("cp $opath/php_ioncube.so $basePath/run/newphp/lib/php_ioncube.so");
-zexec("cp $basePath/run/lib/extensions/no-debug-zts-20151012/opcache.so $basePath/run/newphp/lib/php_opcache.so");
+zexec("cp $basePath/run/lib/extensions/no-debug-zts-20170718/opcache.so $basePath/run/newphp/lib/php_opcache.so");
 $uname = `uname -m`;
 if(strpos($uname, '_64') !== false) zexec("cp $opath/php_ioncube_x64.so $basePath/run/newphp/lib/php_ioncube.so");
 chdir("$basePath/run");

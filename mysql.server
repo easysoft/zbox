@@ -139,7 +139,7 @@ case "$mode" in
   'stop')
     # Stop daemon. We use a signal here to avoid having to know the
     # root password.
-    mysqld_pid=`ps aux|grep '\/opt\/zbox\/run\/mysql\/mysqld '|awk '{print $2}'`
+    mysqld_pid=`ps aux|grep '\/opt\/zbox\/run\/mysql\/mariadbd '|awk '{print $2}'`
     if (kill -0 $mysqld_pid 2>/dev/null)
     then
       kill $mysqld_pid
@@ -164,7 +164,7 @@ case "$mode" in
 
   'status')
     # First, check to see if pid file exists
-    mysqld_pid=`ps aux|grep '\/opt\/zbox\/run\/mysql\/mysqld '|awk '{print $2}'`
+    mysqld_pid=`ps aux|grep '\/opt\/zbox\/run\/mysql\/mariadbd '|awk '{print $2}'`
     if kill -0 $mysqld_pid 2>/dev/null ; then 
       log_success_msg "MySQL running ($mysqld_pid)"
       exit 0
