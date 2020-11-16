@@ -20,9 +20,9 @@ if(!is_dir($basePath))
 {
     zexec("mkdir $basePath");
     zexec("cp zbox $basePath/");
-    zexec("cp zbox.php $basePath/");
     chdir($basePath);
     zexec("mkdir app auth bin data etc logs run tmp");
+    zexec("cp zbox.php $basePath/bin");
     zexec("mkdir app/htdocs data/mysql tmp/php tmp/apache tmp/mysql etc/php etc/mysql");
     zexec("chmod -R 777 tmp");
     zexec("chmod -R 777 logs");
@@ -153,7 +153,7 @@ zexec("cp ab htpasswd httpd rotatelogs $basePath/run/newapache/");
 zexec("cp $opath/apachectl $basePath/run/newapache;chmod a+x $basePath/run/newapache/apachectl");
 zexec("mkdir $basePath/run/newapache/modules");
 chdir("$basePath/run/apache/modules");
-zexec("cp libphp7.so mod_authn_file.so mod_access_compat.so mod_alias.so mod_authn_core.so mod_auth_basic.so mod_authz_core.so mod_authz_host.so mod_authz_user.so mod_autoindex.so mod_deflate.so mod_dir.so mod_env.so mod_expires.so mod_filter.so mod_log_config.so mod_mime.so mod_rewrite.so mod_setenvif.so mod_unixd.so mod_ssl.so mod_macro.so mod_headers.so $basePath/run/newapache/modules");
+zexec("cp libphp7.so mod_authn_file.so mod_access_compat.so mod_alias.so mod_authn_core.so mod_auth_basic.so mod_authz_core.so mod_authz_host.so mod_authz_user.so mod_autoindex.so mod_deflate.so mod_dir.so mod_env.so mod_expires.so mod_filter.so mod_log_config.so mod_mime.so mod_rewrite.so mod_setenvif.so mod_unixd.so mod_ssl.so mod_macro.so mod_headers.so mod_socache_shmcb.so $basePath/run/newapache/modules");
 chdir($basePath);
 zexec("rm -rf $basePath/run/apache");
 zexec("rm -rf $basePath/run/lib/pkgconfig");
@@ -288,9 +288,17 @@ zexec("ln -s $basePath/run/php/php $basePath/bin/");
 
 zexec("rm $basePath/apachefinish $basePath/mysqlfinish $basePath/phpfinish");
 
+if(strpos($uname, '_64') !== false)
+{
+    zexec("cp -a $opath/xxd_64 $basePath/run/xxd");
+}
+else
+{
+    zexec("cp -a $opath/xxd_32 $basePath/run/xxd");
+}
+
 /* Set mysql root password and add new mysql user. */
 `service mysql stop`;
 zexec("$basePath/run/mysql/mysql.server start --defaults-file=$basePath/etc/mysql/my.cnf");
 sleep(2);
 zexec("$basePath/run/mysql/mysql --defaults-file=$basePath/etc/mysql/my.cnf -uroot < $opath/createuser.sql");
-zexec("$basePath/run/mysql/mysql.server stop");

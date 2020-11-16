@@ -1,3 +1,3 @@
 #!/bin/bash
 export LD_LIBRARY_PATH=/opt/zbox/run/
-/opt/zbox/bin/php /opt/zbox/zbox.php $*
+/opt/zbox/bin/php /opt/zbox/bin/zbox.php $*
