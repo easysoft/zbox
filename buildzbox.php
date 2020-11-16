@@ -20,9 +20,11 @@ if(!is_dir($basePath))
 {
     zexec("mkdir $basePath");
     zexec("cp zbox $basePath/");
+    zexec("mkdir $basePath/bin");
+    zexec("cp zbox.php $basePath/bin/");
+    zexec("cp xxd.php $basePath/bin/");
     chdir($basePath);
-    zexec("mkdir app auth bin data etc logs run tmp");
-    zexec("cp zbox.php $basePath/bin");
+    zexec("mkdir app auth data etc logs run tmp");
     zexec("mkdir app/htdocs data/mysql tmp/php tmp/apache tmp/mysql etc/php etc/mysql");
     zexec("chmod -R 777 tmp");
     zexec("chmod -R 777 logs");
@@ -106,7 +108,7 @@ if(!file_exists("$basePath/mysqlfinish"))
         -DWITH_BLACKHOLE_STORAGE_ENGINE=1  \
         -DEXTRA_CHARSETS=all \
         -DWIYH_READLINE=1  \
-        -DWIYH_SSL=system  \
+        -DWIYH_SSL=system \
         -DVITH_ZLIB=system  \
         -DWITH_LOBWRAP=0  \
         -DMYSQL_UNIX_ADDR=/opt/zbox/tmp/mysql/mysql.sock \
@@ -128,23 +130,24 @@ if(!file_exists("$basePath/phpfinish"))
     /* Compile php. */
     chdir($buildPath . "/php-{$phpVersion}");
     zexec('./configure --prefix=/opt/zbox/run/ \
+	--enable-safe-mode \
         --bindir=/opt/zbox/run/php \
         --libdir=/opt/zbox/run/lib \
         --sysconfdir=/opt/zbox/etc/apache \
         --with-apxs2=/opt/zbox/run/apache/apxs \
         --with-config-file-path=/opt/zbox/etc/php \
         --enable-mbstring --enable-bcmath --enable-sockets --disable-ipv6 \
-        --with-curl=/usr/local --with-openssl --with-imap --with-kerberos --with-imap-ssl \
+        --with-curl --with-curlwrappers --with-kerberos \
         --with-gd  --with-jpeg-dir --enable-gd-native-ttf --enable-gd-jis-conv \
         --with-ldap --with-ldap-sasl \
+        --with-openssl \
         --enable-zip --with-zlib --with-bz2 \
         --enable-opcache --with-mcrypt \
         --with-mysqli --with-pdo-mysql');
-    zexec("sed -i '/^EXTRA_LIBS/s/$/ -llber $/g' Makefile");
+    zexec("sed -i '/^EXTRA_LIBS/s/$/ -llber/g' Makefile");
     zexec('make && make install');
     zexec("touch $basePath/phpfinish");
 }
-//exit;
 
 /* Simplify apache */
 zexec("mkdir $basePath/run/newapache");
@@ -153,7 +156,7 @@ zexec("cp ab htpasswd httpd rotatelogs $basePath/run/newapache/");
 zexec("cp $opath/apachectl $basePath/run/newapache;chmod a+x $basePath/run/newapache/apachectl");
 zexec("mkdir $basePath/run/newapache/modules");
 chdir("$basePath/run/apache/modules");
-zexec("cp libphp7.so mod_authn_file.so mod_access_compat.so mod_alias.so mod_authn_core.so mod_auth_basic.so mod_authz_core.so mod_authz_host.so mod_authz_user.so mod_autoindex.so mod_deflate.so mod_dir.so mod_env.so mod_expires.so mod_filter.so mod_log_config.so mod_mime.so mod_rewrite.so mod_setenvif.so mod_unixd.so mod_ssl.so mod_macro.so mod_headers.so mod_socache_shmcb.so $basePath/run/newapache/modules");
+zexec("cp libphp7.so mod_authn_file.so mod_access_compat.so mod_deflate.so mod_alias.so mod_authn_core.so mod_auth_basic.so mod_authz_core.so mod_authz_host.so mod_authz_user.so mod_autoindex.so mod_dir.so mod_env.so mod_expires.so mod_filter.so mod_log_config.so mod_mime.so mod_rewrite.so mod_setenvif.so mod_unixd.so mod_ssl.so mod_macro.so mod_headers.so mod_socache_shmcb.so $basePath/run/newapache/modules");
 chdir($basePath);
 zexec("rm -rf $basePath/run/apache");
 zexec("rm -rf $basePath/run/lib/pkgconfig");
@@ -272,6 +275,23 @@ foreach($runDirs as $runDir)
     }
 }
 
+/* Copy dns. */
+zexec("cp /lib64/libnss_dns-2.23.so /opt/zbox/run/lib/libnss_dns-2.23.so");
+zexec("cp /lib64/libnss_dns.so.2 /opt/zbox/run/lib/libnss_dns.so.2");
+zexec("cp /lib64/libnss_files-2.23.so /opt/zbox/run/lib/libnss_files-2.23.so");
+zexec("cp /lib64/libnss_files.so.2 /opt/zbox/run/lib/libnss_files.so.2");
+
+zexec("/root/bin/patchelf --set-interpreter /opt/zbox/run/lib/libresolv.so.2 libnss_dns.so.2");
+zexec("/root/bin/patchelf --set-interpreter /opt/zbox/run/lib/libc.so.6 libnss_dns.so.2");
+zexec("/root/bin/patchelf --set-interpreter /opt/zbox/run/lib/libresolv.so.2 libnss_dns-2.23.so");
+zexec("/root/bin/patchelf --set-interpreter /opt/zbox/run/lib/libc.so.6 libnss_dns-2.23.so");
+zexec("/root/bin/patchelf --set-interpreter /opt/zbox/run/lib/libc.so.6 libnss_files-2.23.so");
+zexec("/root/bin/patchelf --set-interpreter /opt/zbox/run/lib/libc.so.6 libnss_files.so.2");
+zexec("/root/bin/patchelf --set-rpath /opt/zbox/run/lib/ libnss_files.so.2");
+zexec("/root/bin/patchelf --set-rpath /opt/zbox/run/lib/ libnss_files-2.23.so");
+zexec("/root/bin/patchelf --set-rpath /opt/zbox/run/lib/ libnss_dns.so.2");
+zexec("/root/bin/patchelf --set-rpath /opt/zbox/run/lib/ libnss_dns-2.23.so");
+
 foreach($interpreters as $interpreter)
 {
     $interpreterName = basename($interpreter);
@@ -302,3 +322,4 @@ else
 zexec("$basePath/run/mysql/mysql.server start --defaults-file=$basePath/etc/mysql/my.cnf");
 sleep(2);
 zexec("$basePath/run/mysql/mysql --defaults-file=$basePath/etc/mysql/my.cnf -uroot < $opath/createuser.sql");
+zexec("$basePath/run/mysql/mysql.server stop");
