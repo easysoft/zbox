@@ -129,22 +129,34 @@ if(!file_exists("$basePath/phpfinish"))
 
     /* Compile php. */
     chdir($buildPath . "/php-{$phpVersion}");
-    zexec('./configure --prefix=/opt/zbox/run/ \
-	--enable-safe-mode \
-        --bindir=/opt/zbox/run/php \
-        --libdir=/opt/zbox/run/lib \
-        --sysconfdir=/opt/zbox/etc/apache \
-        --with-apxs2=/opt/zbox/run/apache/apxs \
-        --with-config-file-path=/opt/zbox/etc/php \
-        --enable-mbstring --enable-bcmath --enable-sockets --disable-ipv6 \
-        --with-curl --with-curlwrappers --with-kerberos \
-        --with-gd  --with-jpeg-dir --with-freetype-dir --enable-gd-native-ttf --enable-gd-jis-conv \
-        --with-ldap --with-ldap-sasl \
-        --with-openssl \
-        --enable-zip --with-zlib --with-bz2 \
-        --enable-opcache --with-mcrypt \
-        --with-mysqli --with-pdo-mysql');
-    zexec("sed -i '/^EXTRA_LIBS/s/$/ -llber/g' Makefile");
+    zexec("./configure \
+    CFLAGS='-Wl,-rpath,/opt/zbox/run/lib64/php-7.4.30' \
+    LIBS=-llber \
+    ONIG_LIBS=-lonig \
+    --sysconfdir=/opt/zbox/etc/apache \
+    --with-config-file-path=/opt/zbox/etc/php \
+    --with-openssl \
+    --with-apxs2 \
+    --with-curl \
+    --with-kerberos \
+    --with-ldap \
+    --with-ldap-sasl \
+    --with-zlib \
+    --with-bz2 \
+    --with-mysqli \
+    --with-pdo-mysql \
+    --with-zip \
+    --with-jpeg \
+    --with-freetype \
+    --with-pic \
+    --enable-gd \
+    --enable-mbstring \
+    --enable-bcmath \
+    --enable-sockets \
+    --disable-ipv6 \
+    --disable-mbregex \
+    --enable-maintainer-zts");
+    //zexec("sed -i '/^EXTRA_LIBS/s/$/ -llber/g' Makefile");
     zexec('make && make install');
     zexec("touch $basePath/phpfinish");
 }
